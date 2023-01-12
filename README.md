@@ -1,9 +1,9 @@
-# Routing Problems for Multiple Cooperative UAVs using Transformers
+# Solving the Team Orienteering Problem with Transformers
 
 ![TSP100](images/top.gif)
 
 ## Paper
-Solving a variant of the Orieentering Problem (OP) called the Team Orienteering Problem (TOP) with a cooperative
+Solve a variant of the Orieentering Problem (OP) called the Team Orienteering Problem (TOP) with a cooperative
 multi-agent system based on Transformer Networks. For more details, please see our [paper](). If this repository is
 useful for your work, please cite our paper:
 
