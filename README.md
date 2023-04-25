@@ -52,9 +52,9 @@ Baselines algorithms like Ant Colony Optimization (`aco`), Particle Swarm Optimi
 python -m problems.op.eval_baselines --method aco --multiprocessing True --datasets data/1depots/const/20/test_seed1234_L2.pkl
 ```
 
-Finally, you can visualize an example of executions using:
+Finally, you can visualize an example using:
 ```bash
-python visualize.py --graph_size 20 --num_agents 2 --max_length 2--data_distribution const --model outputs/op_coop20/attention_run...
+python visualize.py --graph_size 20 --num_agents 2 --max_length 2--data_distribution const --model outputs/op_const20/attention_run...
 python visualize.py --graph_size 20 --num_agents 2 --max_length 2--data_distribution const --model aco
 ```
 
