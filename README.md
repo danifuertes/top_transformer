@@ -36,9 +36,10 @@ python run.py --model attention --graph_size 20 --max_length 2 --num_agents 2 --
 ```
 
 [Pointer Network](https://arxiv.org/abs/1506.03134) (`pointer`),
-[Graph Pointer Network](https://arxiv.org/abs/1911.04936) (`gpn`) and [GAMMA](https://arxiv.org/abs/1911.04936)
+[Graph Pointer Network](https://arxiv.org/abs/1911.04936) (`gpn`) and
+[GAMMA](https://doi.org/10.1109/TNNLS.2022.3159671)
 (`gamma`) can also be trained with the `--model` option. To resume training, load your last saved model with the
-`--resume` option.
+`--resume` option. Additionally, pretrained models are provided inside the folder `pretrained`.
 
 Evaluate your trained models with:
 ```bash
