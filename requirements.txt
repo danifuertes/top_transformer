@@ -1,6 +1,5 @@
 matplotlib==3.6.3
 numba==0.56.4
-numpy==1.24.1
 scipy==1.10.0
 tensorboard==2.11.0
 tensorboard_logger==0.1.0

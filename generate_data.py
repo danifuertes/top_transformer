@@ -43,36 +43,53 @@ def generate_top_data(dataset_size, op_size, prize_type='const', max_length=2, n
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
+    # Filename
     parser.add_argument("--name", type=str, required=True, help="Name to identify dataset (test, validation...)")
     parser.add_argument("--data_dir", default='data', help="Create datasets in data_dir/problem (default 'data')")
+
+    # Data
     parser.add_argument("--dataset_size", type=int, default=10000, help="Size of the dataset")
     parser.add_argument('--graph_sizes', type=int, nargs='+', default=[20, 50, 100],
                         help="Sizes of problem instances (default 20, 50, 100)")
     parser.add_argument('--data_distribution', type=str, default='all',
                         help="Distributions to generate for problem: const, dist, unif or all.")
-    parser.add_argument('--max_length', type=float, default=2, help="Normalized time limit to solve the problem")
+    parser.add_argument('--max_length', type=float, nargs='+', default=[2],
+                        help="Normalized time limit to solve the problem")
     parser.add_argument('--num_depots', type=int, default=1, help="Number of depots. Options are 1 or 2. num_depots=1"
                         "means that the start and end depot are the same. num_depots=2 means that they are different")
+
+    # Misc
     parser.add_argument("-f", action='store_true', help="Set true to overwrite")
     parser.add_argument('--seed', type=int, default=1234, help="Random seed")
     opts = parser.parse_args()
+    assert len(opts.max_length) in [1, len(opts.graph_sizes)], \
+        "You must indicate one single max_length or one max_length for each graph size"
+
+    # Set seed
     set_seed(opts.seed)
 
+    # For each distribution
     distributions = ['const', 'unif', 'dist'] if opts.data_distribution == 'all' else [opts.data_distribution]
     for distribution in distributions:
-        print(distribution)
-        for graph_size in tqdm(opts.graph_sizes):
+        print(f'Reward distribution: {distribution}')
 
-            # Directory and filename
+        # For each graph_size
+        for i, graph_size in enumerate(tqdm(opts.graph_sizes)):
+
+            # Max length
+            max_length = opts.max_length[0] if len(opts.max_length) == 1 else opts.max_length[i]
+
+            # Directory
             data_dir = os.path.join(opts.data_dir, str(opts.num_depots) + 'depots', distribution, str(graph_size))
-            if not os.path.exists(data_dir):
-                os.makedirs(data_dir, exist_ok=True)
-            length_str = int(opts.max_length) if opts.max_length.is_integer() else opts.max_length
-            filename = os.path.join(data_dir, "{}_seed{}_L{}.pkl".format(opts.name, opts.seed, length_str))
+            os.makedirs(data_dir, exist_ok=True)
+
+            # Filename
+            filename = os.path.join(data_dir, "{}_seed{}_L{}.pkl".format(opts.name, opts.seed, max_length))
 
             # Generate data
             dataset = generate_top_data(opts.dataset_size, graph_size, prize_type=distribution,
-                                        max_length=opts.max_length, num_depots=opts.num_depots)
+                                        max_length=max_length, num_depots=opts.num_depots)
 
             # Save dataset
             save_dataset(dataset, filename)
