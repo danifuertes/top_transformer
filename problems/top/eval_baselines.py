@@ -135,7 +135,7 @@ if __name__ == "__main__":
     parser.add_argument('--disable_cache', action='store_true', help="Disable caching")
 
     # Method
-    parser.add_argument('--method', help="Name of the method to evaluate, 'compass', 'opga' or 'tsili'")
+    parser.add_argument('--method', help="Name of the method to evaluate, 'aco', 'opga' or 'pso'")
 
     # CPU
     parser.add_argument('--multiprocessing', type=str2bool, default=False, help="Use multiprocessing")

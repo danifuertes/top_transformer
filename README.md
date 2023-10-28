@@ -26,14 +26,17 @@ useful for your work, please cite our paper:
 
 First, it is necessary to create test and validation sets:
 ```bash
-python generate_data.py --name test --seed 1234 --graph_sizes 20 50 100 --max_length 2
-python generate_data.py --name val --seed 4321 --graph_sizes 20 50 100 --max_length 2
+python generate_data.py --name test --seed 1234 --graph_sizes 20 20 20 35 35 35 50 50 50 75 75 75 100 100 100 --max_length 1.5 2 2.5 1.5 2 2.5 1.5 2 2.5 1.5 2 2.5 1.5 2 2.5
+python generate_data.py --name val --seed 4321 --graph_sizes 20 20 20 35 35 35 50 50 50 75 75 75 100 100 100 --max_length 1.5 2 2.5 1.5 2 2.5 1.5 2 2.5 1.5 2 2.5 1.5 2 2.5
 ```
 
 To train a Transformer model (`attention`) use:
 ```bash
-python run.py --model attention --graph_size 20 --max_length 2 --num_agents 2 --data_distribution const --baseline rollout --val_dataset data/1depots/const/20/validation_seed4321_L2.pkl
+python run.py --problem top --model attention --val_dataset data/1depots/const/20/val_seed4321_L2.0.pkl --graph_size 20 --data_distribution const --num_agents 2 --max_length 1.5 --baseline rollout
 ```
+
+and change the environment conditions (number of agents, graph size, max length, reward distribution...)
+at your convenience.
 
 [Pointer Network](https://arxiv.org/abs/1506.03134) (`pointer`),
 [Graph Pointer Network](https://arxiv.org/abs/1911.04936) (`gpn`) and
@@ -43,7 +46,7 @@ python run.py --model attention --graph_size 20 --max_length 2 --num_agents 2 --
 
 Evaluate your trained models with:
 ```bash
-python eval.py --model outputs/top_const20/attention_run... --num_agents 2 --datasets data/1depots/const/20/test_seed1234_L2.pkl
+python eval.py data/1depots/const/20/test_seed1234_L2.0.pkl --model outputs/top_const20/attention_... --num_agents 2
 ```
 If the epoch is not specified, by default the last one in the folder will be used.
 
@@ -55,8 +58,8 @@ python -m problems.op.eval_baselines --method aco --multiprocessing True --datas
 
 Finally, you can visualize an example using:
 ```bash
-python visualize.py --graph_size 20 --num_agents 2 --max_length 2--data_distribution const --model outputs/op_const20/attention_run...
-python visualize.py --graph_size 20 --num_agents 2 --max_length 2--data_distribution const --model aco
+python visualize.py --graph_size 20 --num_agents 2 --max_length 2 --data_distribution const --model outputs/top_const20/attention_...
+python visualize.py --graph_size 20 --num_agents 2 --max_length 2 --data_distribution const --model aco
 ```
 
 ### Other options and help
