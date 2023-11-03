@@ -32,7 +32,7 @@ python generate_data.py --name val --seed 4321 --graph_sizes 20 20 20 35 35 35 5
 
 To train a Transformer model (`attention`) use:
 ```bash
-python run.py --problem top --model attention --val_dataset data/1depots/const/20/val_seed4321_L2.0.pkl --graph_size 20 --data_distribution const --num_agents 2 --max_length 1.5 --baseline rollout
+python run.py --problem top --model attention --val_dataset data/1depots/const/20/val_seed4321_L2.0.pkl --graph_size 20 --data_distribution const --num_agents 2 --max_length 2.0 --baseline rollout
 ```
 
 and change the environment conditions (number of agents, graph size, max length, reward distribution...)
