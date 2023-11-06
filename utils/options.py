@@ -24,8 +24,8 @@ def str2bool(v):
 
 def get_options(args=None):
     parser = argparse.ArgumentParser(
-        description="Attention model (Transformer) to solve the Combinatorial Optimization Problems, specially the OP "
-                    "(Orienteering Problem), with Reinforcement Learning. The code is mainly adapted for the OP.")
+        description="Attention model (Transformer) to solve Combinatorial Optimization Problems, specially the TOP "
+                    "(Team Orienteering Problem), with Reinforcement Learning. The code is mainly adapted for the TOP.")
     parser.add_argument('--seed', type=int, default=1234, help="Random seed to use")
 
     # Problem
