@@ -1,4 +1,8 @@
 # Solving the Team Orienteering Problem with Transformers
+![](images/python-3.8.svg)
+![](images/torch-1.13.1.svg)
+![](images/cuda-11.7.svg)
+![](images/cudnn-8.5.svg)
 
 ![TSP100](images/top.gif)
 
