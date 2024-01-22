@@ -7,12 +7,19 @@
 ![TSP100](images/top.gif)
 
 ## Paper
-Solve a variant of the Orieentering Problem (OP) called the Team Orienteering Problem (TOP) with a cooperative
+Solve a variant of the Orienteering Problem (OP) called the Team Orienteering Problem (TOP) with a cooperative
 multi-agent system based on Transformer Networks. For more details, please see our [paper](). If this repository is
 useful for your work, please cite our paper:
 
 ```
-
+@misc{fuertes2023,
+    title={Solving the Team Orienteering Problem with Transformers}, 
+    author={Daniel Fuertes and Carlos R. del-Blanco and Fernando Jaureguizar and Narciso García},
+    year={2023},
+    eprint={2311.18662},
+    archivePrefix={arXiv},
+    primaryClass={cs.AI}
+}
 ``` 
 
 ## Dependencies
@@ -41,6 +48,14 @@ python run.py --problem top --model attention --val_dataset data/1depots/const/2
 
 and change the environment conditions (number of agents, graph size, max length, reward distribution...)
 at your convenience.
+
+Pretrained weights are available
+[here](https://drive.google.com/file/d/1_X3XLykS6f_ShIJcGOgDJZ-SrElT04_1/view?usp=drive_link). You can unzip the file
+with `unzip` (`sudo apt-get install unzip`):
+
+```bash
+unzip pretrained.zip
+```
 
 [Pointer Network](https://arxiv.org/abs/1506.03134) (`pointer`),
 [Graph Pointer Network](https://arxiv.org/abs/1911.04936) (`gpn`) and
