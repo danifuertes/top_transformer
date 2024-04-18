@@ -8,7 +8,7 @@
 
 ## Paper
 Solve a variant of the Orienteering Problem (OP) called the Team Orienteering Problem (TOP) with a cooperative
-multi-agent system based on Transformer Networks. For more details, please see our [paper](). If this repository is
+multi-agent system based on Transformer Networks. For more details, please see our [paper](https://doi.org/10.48550/arXiv.2311.18662). If this repository is
 useful for your work, please cite our paper:
 
 ```
