@@ -9,6 +9,7 @@ from problems.top.aco import ACO
 from problems.top.pso import PSO
 from utils import run_all_in_pool
 #from visualize import force_return
+from problems.top.gurobi import top_gurobi
 from utils.data_utils import check_extension, load_dataset, save_dataset, str2bool, set_seed
 
 MAX_LENGTH_TOL = 1e-5
@@ -31,7 +32,7 @@ def calc_op_length(depot, loc, tour, return2depot=True):
     return 0
 
 
-def solve_opga(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False):
+def solve_opga(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False, *args, **kwargs):
     problem_filename = os.path.join(directory, "{}.opga.pkl".format(name))
     data = np.concatenate((loc, np.expand_dims(prize, 1), np.zeros((len(loc), 1))), 1)
     data = np.concatenate((np.array([[*depot, 0, 0]]), data), 0)
@@ -59,7 +60,7 @@ def solve_opga(directory, name, depot, loc, prize, max_length, num_agents, retur
     return cost, tours, duration
 
 
-def solve_aco(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False):
+def solve_aco(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False, *args, **kwargs):
     problem_filename = os.path.join(directory, "{}.aco.pkl".format(name))
     data = np.concatenate((loc, np.expand_dims(prize, 1), np.zeros((len(loc), 1))), 1)
     data = np.concatenate((np.array([[*depot, 0, 0]]), data), 0)
@@ -87,7 +88,7 @@ def solve_aco(directory, name, depot, loc, prize, max_length, num_agents, return
     return cost, tours, duration
 
 
-def solve_pso(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False):
+def solve_pso(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False, *args, **kwargs):
     problem_filename = os.path.join(directory, "{}.pso.pkl".format(name))
     data = np.concatenate((loc, np.expand_dims(prize, 1), np.zeros((len(loc), 1))), 1)
     data = np.concatenate((np.array([[*depot, 0, 0]]), data), 0)
@@ -107,6 +108,29 @@ def solve_pso(directory, name, depot, loc, prize, max_length, num_agents, return
         #         force_return(np.concatenate(([0], tour, [0])), np.concatenate(([depot], loc), 0), max_length)[1:-1]
         #         for tour in tours
         #     ]
+        print(tours)
+        cost = np.sum([-calc_op_total(prize, tour) for tour in tours])
+        save_dataset((cost, tours, duration), problem_filename)
+
+    for tour in tours:
+        assert calc_op_length(depot, loc, tour, return2depot) <= max_length + MAX_LENGTH_TOL, "Tour exceeds max_length!"
+    return cost, tours, duration
+
+
+def solve_gurobi(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False, timeout=0, *args, **kwargs):
+    problem_filename = os.path.join(directory, "{}.gurobi.pkl".format(name))
+    if os.path.isfile(problem_filename) and not disable_cache:
+        (cost, tours, duration) = load_dataset(problem_filename)
+    else:
+        tours, duration = top_gurobi(
+            num_agents=num_agents,
+            nodes=loc,
+            prizes=prize,
+            depot=depot,
+            max_length=np.ones(num_agents) * max_length,
+            timeout=timeout,
+        )
+        tours = [tour[1:] for tour in tours]
         cost = np.sum([-calc_op_total(prize, tour) for tour in tours])
         save_dataset((cost, tours, duration), problem_filename)
 
@@ -135,7 +159,8 @@ if __name__ == "__main__":
     parser.add_argument('--disable_cache', action='store_true', help="Disable caching")
 
     # Method
-    parser.add_argument('--method', help="Name of the method to evaluate, 'aco', 'opga' or 'pso'")
+    parser.add_argument('--method', help="Name of the method to evaluate, 'aco', 'opga', 'pso', or 'gurobi'")
+    parser.add_argument('--timeout', type=int, default=0, help="Number of seconds to retrieve gurobi solution")
 
     # CPU
     parser.add_argument('--multiprocessing', type=str2bool, default=False, help="Use multiprocessing")
@@ -183,11 +208,16 @@ if __name__ == "__main__":
                 return solve_aco(*args, num_agents=opts.num_agents, return2depot=opts.return2depot,
                                  disable_cache=opts.disable_cache)
 
-        else:
-            assert method == "pso"
+        elif method == "pso":
             def run_func(args):
                 return solve_pso(*args, num_agents=opts.num_agents, return2depot=opts.return2depot,
                                  disable_cache=opts.disable_cache)
+
+        else:
+            assert method == "gurobi"
+            def run_func(args):
+                return solve_gurobi(*args, num_agents=opts.num_agents, return2depot=opts.return2depot, timeout=opts.timeout,
+                                    disable_cache=opts.disable_cache)
 
         results, parallelism = run_all_in_pool(
             run_func,

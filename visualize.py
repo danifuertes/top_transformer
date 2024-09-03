@@ -19,14 +19,15 @@ def arguments(args=None):
     # Method
     parser.add_argument('--model', help='Path to load model. Just indicate the directory where epochs are saved or'
                                         'the directory + the specific epoch you want to load. For baselines, indicate'
-                                        'the name of the baselines instead (opga, pso, aco)-')
+                                        'the name of the baselines instead (opga, pso, aco, gurobi)')
+    parser.add_argument('--timeout', type=int, default=0, help="Number of seconds to retrieve gurobi solution")
 
     # Problem
     parser.add_argument('--problem', default='top', help="The problem to solve, default 'tsp'")
     parser.add_argument('--graph_size', type=int, default=20, help="The size of the problem graph")
     parser.add_argument('--data_distribution', type=str, default='const',
                         help='Data distribution to use during training, defaults and options depend on problem')
-    parser.add_argument('--num_agents', type=int, default=4, help="Number of agents")
+    parser.add_argument('--num_agents', type=int, default=2, help="Number of agents")
     parser.add_argument('--num_depots', type=int, default=1, help="Number of depots. Options are 1 or 2. num_depots=1"
                         "means that the start and end depot are the same. num_depots=2 means that they are different")
     parser.add_argument('--return2depot', type=str2bool, default=True, help="True for constraint of returning to depot")
@@ -42,8 +43,8 @@ def arguments(args=None):
     assert opts.num_agents > 0, 'num_agents must be greater than 0'
 
     # Check baseline is correct for the given problem
-    assert opts.model in ('opga', 'aco', 'pso') or os.path.exists(opts.model), \
-        'Path to model does not exist. For baselines, the supported baselines for TOP are opga, aco, pso'
+    assert opts.model in ('opga', 'aco', 'pso', 'gurobi') or os.path.exists(opts.model), \
+        'Path to model does not exist. For baselines, the supported baselines for TOP are opga, aco, pso, gurobi'
     return opts
 
 
@@ -58,7 +59,7 @@ def arguments(args=None):
 #     return np.array(new_tour)
 
 
-def baselines(num_agents, baseline, dataset, return2depot=True):
+def baselines(num_agents, baseline, dataset, return2depot=True, timeout=0):
 
     # https://github.com/robin-shaun/Multi-UAV-Task-Assignment-Benchmark
     # https://github.com/dietmarwo/Multi-UAV-Task-Assignment-Benchmark
@@ -108,6 +109,18 @@ def baselines(num_agents, baseline, dataset, return2depot=True):
             inputs['max_length'],
             return2depot
         ).run()
+    
+    if baseline == 'gurobi':
+        from problems.top.gurobi import top_gurobi
+        model_name = 'Gurobi'
+        tours, _ = top_gurobi(
+            num_agents=num_agents,
+            nodes=inputs['loc'],
+            prizes=inputs['prize'],
+            depot=inputs['depot'],
+            max_length=np.ones(num_agents) * inputs['max_length'],
+            timeout=timeout,
+        )
 
     # Lists to numpy arrays
     for k, v in inputs.items():
@@ -228,8 +241,8 @@ def main(opts):
     inputs = dataset.data[0]
 
     # Apply a baseline (GA, PSO, ACO)
-    if opts.model in ['aco', 'pso', 'opga']:
-        tours, inputs, model_name = baselines(opts.num_agents, opts.model, dataset, return2depot=opts.return2depot)
+    if opts.model in ['aco', 'pso', 'opga', 'gurobi']:
+        tours, inputs, model_name = baselines(opts.num_agents, opts.model, dataset, return2depot=opts.return2depot, timeout=opts.timeout)
 
     # Apply a Deep Learning model (Transformer, PN, GPN)
     else:
