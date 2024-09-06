@@ -19,7 +19,7 @@ def arguments(args=None):
     # Method
     parser.add_argument('--model', help='Path to load model. Just indicate the directory where epochs are saved or'
                                         'the directory + the specific epoch you want to load. For baselines, indicate'
-                                        'the name of the baselines instead (opga, pso, aco, gurobi)')
+                                        'the name of the baselines instead (opga, pso, aco, gurobi, compass)')
     parser.add_argument('--timeout', type=int, default=0, help="Number of seconds to retrieve gurobi solution")
 
     # Problem
@@ -43,8 +43,8 @@ def arguments(args=None):
     assert opts.num_agents > 0, 'num_agents must be greater than 0'
 
     # Check baseline is correct for the given problem
-    assert opts.model in ('opga', 'aco', 'pso', 'gurobi') or os.path.exists(opts.model), \
-        'Path to model does not exist. For baselines, the supported baselines for TOP are opga, aco, pso, gurobi'
+    assert opts.model in ('opga', 'aco', 'pso', 'gurobi', 'compass') or os.path.exists(opts.model), \
+        'Path to model does not exist. For baselines, the supported baselines for TOP are opga, aco, pso, gurobi', 'compass'
     return opts
 
 
@@ -120,6 +120,17 @@ def baselines(num_agents, baseline, dataset, return2depot=True, timeout=0):
             depot=inputs['depot'],
             max_length=np.ones(num_agents) * inputs['max_length'],
             timeout=timeout,
+        )
+    
+    if baseline == 'compass':
+        from problems.top.compass import top_compass
+        model_name = 'Compass'
+        tours, _ = top_compass(
+            num_agents=num_agents,
+            nodes=inputs['loc'],
+            prizes=inputs['prize'],
+            depot=inputs['depot'],
+            max_length=np.ones(num_agents) * inputs['max_length'],
         )
 
     # Lists to numpy arrays
@@ -241,7 +252,7 @@ def main(opts):
     inputs = dataset.data[0]
 
     # Apply a baseline (GA, PSO, ACO)
-    if opts.model in ['aco', 'pso', 'opga', 'gurobi']:
+    if opts.model in ['aco', 'pso', 'opga', 'gurobi', 'compass']:
         tours, inputs, model_name = baselines(opts.num_agents, opts.model, dataset, return2depot=opts.return2depot, timeout=opts.timeout)
 
     # Apply a Deep Learning model (Transformer, PN, GPN)

@@ -10,6 +10,7 @@ from problems.top.pso import PSO
 from utils import run_all_in_pool
 #from visualize import force_return
 from problems.top.gurobi import top_gurobi
+from problems.top.compass import top_compass
 from utils.data_utils import check_extension, load_dataset, save_dataset, str2bool, set_seed
 
 MAX_LENGTH_TOL = 1e-5
@@ -121,6 +122,28 @@ def solve_pso(directory, name, depot, loc, prize, max_length, num_agents, return
     return cost, tours, duration
 
 
+def solve_compass(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False, timeout=0, *args, **kwargs):
+    problem_filename = os.path.join(directory, "{}.compass.pkl".format(name))
+    if os.path.isfile(problem_filename) and not disable_cache:
+        (cost, tours, duration) = load_dataset(problem_filename)
+    else:
+        tours, duration = top_compass(
+            num_agents=num_agents,
+            nodes=loc,
+            prizes=prize,
+            depot=depot,
+            max_length=np.ones(num_agents) * max_length,
+            timeout=timeout,
+        )
+        tours = [tour[1:] for tour in tours]
+        cost = np.sum([-calc_op_total(prize, tour) for tour in tours])
+        save_dataset((cost, tours, duration), problem_filename)
+
+    for tour in tours:
+        assert calc_op_length(depot, loc, tour, return2depot) <= max_length + MAX_LENGTH_TOL, "Tour exceeds max_length!"
+    return cost, tours, duration
+
+
 def solve_gurobi(directory, name, depot, loc, prize, max_length, num_agents, return2depot=True, disable_cache=False, timeout=0, *args, **kwargs):
     problem_filename = os.path.join(directory, "{}.gurobi.pkl".format(name))
     if os.path.isfile(problem_filename) and not disable_cache:
@@ -163,7 +186,7 @@ if __name__ == "__main__":
     parser.add_argument('--disable_cache', action='store_true', help="Disable caching")
 
     # Method
-    parser.add_argument('--method', help="Name of the method to evaluate, 'aco', 'opga', 'pso', or 'gurobi'")
+    parser.add_argument('--method', help="Name of the method to evaluate, 'aco', 'opga', 'pso', 'compass', or 'gurobi'")
     parser.add_argument('--timeout', type=int, default=0, help="Number of seconds to retrieve gurobi solution")
 
     # CPU
@@ -216,6 +239,11 @@ if __name__ == "__main__":
             def run_func(args):
                 return solve_pso(*args, num_agents=opts.num_agents, return2depot=opts.return2depot,
                                  disable_cache=opts.disable_cache)
+
+        elif method == "compass":
+            def run_func(args):
+                return solve_compass(*args, num_agents=opts.num_agents, return2depot=opts.return2depot,
+                                     disable_cache=opts.disable_cache)
 
         else:
             assert method == "gurobi"
