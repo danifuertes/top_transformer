@@ -15,6 +15,10 @@ from utils.data_utils import check_extension, load_dataset, save_dataset, str2bo
 MAX_LENGTH_TOL = 1e-5
 
 
+def ci(array):
+    return 2 * np.std(array) / np.sqrt(len(array))
+
+
 def calc_op_total(prize, tour):
     # Subtract 1 since vals index start with 0 while tour indexing starts with 1 as depot is 0
     assert (np.array(tour) > 0).all(), "Depot cannot be in tour"
@@ -225,18 +229,17 @@ if __name__ == "__main__":
         )
 
         costs, tours, durations = zip(*results)  # Not really costs since they should be negative
-        print("Average cost: {} +- {}".format(np.mean(costs), 2 * np.std(costs) / np.sqrt(len(costs))))
-        print('Min cost: {} | Max cost: {}'.format(np.min(costs), np.max(costs)))
-        print("Average serial duration: {} +- {}".format(
-            np.mean(durations), 2 * np.std(durations) / np.sqrt(len(durations))))
-        print("Average parallel duration: {}".format(np.mean(durations) / parallelism))
-        print("Calculated total duration: {} | ({:.4f} seconds)"
-              .format(timedelta(seconds=int(np.sum(durations) / parallelism)), np.sum(durations) / parallelism))
+        costs, durations, durations_p = np.array(costs), np.array(durations), np.array(durations) / parallelism
         nodes = []
         for tour in tours:
             nodes.append(0)
             for k in range(len(tour)):
                 nodes[-1] += len(tour[k])
-        print('Average number of nodes visited: {} +- {}'
-              .format(np.mean(nodes), 2 * np.std(nodes) / np.sqrt(len(nodes))))
+        nodes = np.array(nodes)
+        print(f"Average cost: {costs.mean():.3f} +- {ci(costs):.3f}")
+        print(f"Min cost: {costs.min():.3f} | Max cost: {costs.max():.3f}")
+        print(f"Average number of nodes visited: {nodes.mean():.3f} +- {ci(nodes):.3f}")
+        print(f"Average serial duration: {durations.mean():.3f} +- {ci(durations):.3f}")
+        print(f"Average parallel duration: {durations_p.mean():.3f} +- {ci(durations_p):.3f}")
+        print(f"Calculated total duration: {durations_p.sum():.3f}  ({timedelta(seconds=int(durations_p.sum()))})")
         save_dataset((results, parallelism), out_file)

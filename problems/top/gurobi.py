@@ -70,6 +70,11 @@ def top_gurobi(num_agents, nodes, prizes, depot, max_length, timeout=0):
             path.append(current)
             visited.add(current)
             
+            # Check if model was successful
+            if not hasattr(x[i, current, k], "X"):
+                print(f"[Warning] Model did not solve successfully")
+                return [], model.Runtime
+            
             # Find the next node
             next_node = [k for k in range(num_nodes + 1) if x[i, current, k].X > 0.5 and k not in visited]
             
