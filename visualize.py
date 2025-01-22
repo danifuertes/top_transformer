@@ -55,7 +55,8 @@ def baselines(num_agents, baseline, dataset, return2depot=True, timeout=0):
     # Prepare inputs
     inputs = dataset.data[0]
     for k, v in inputs.items():
-        inputs[k] = v.detach().numpy()
+        if isinstance(v, torch.Tensor):
+            inputs[k] = v.detach().numpy()
     data = np.concatenate((inputs['loc'], np.expand_dims(inputs['prize'], 1), np.zeros((len(inputs['loc']), 1))), 1)
     data = np.concatenate((np.array([[*inputs['depot'], 0, 0]]), data), 0)
 
@@ -170,6 +171,7 @@ def plot_tour(tours, inputs, problem, model_name, data_dist=''):
     # For each agent
     reward, length = 0, 0
     for k, tour in enumerate(tours):
+        tour = np.array(tour)
 
         # Calculate the length of the tour
         nodes = np.take(loc, tour, axis=0)
@@ -195,6 +197,7 @@ def plot_tour(tours, inputs, problem, model_name, data_dist=''):
         title += ' / {:.3g} | Prize = {:.3g} / {:.3g}'.format(inputs['max_length'], reward, np.sum(prizes))
     ax.set_title(title)
     plt.show()
+    return fig, ax
 
 
 def reshape_tours(tours, num_agents, end_ids=0):
