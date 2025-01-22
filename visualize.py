@@ -17,8 +17,8 @@ def arguments(args=None):
     parser.add_argument('--seed', type=int, default=0, help='Random seed to use')
 
     # Method
-    parser.add_argument('--model', help='Path to load model. Just indicate the directory where epochs are saved or'
-                                        'the directory + the specific epoch you want to load. For baselines, indicate'
+    parser.add_argument('--model', help='Path to load model. Just indicate the directory where epochs are saved or '
+                                        'the directory + the specific epoch you want to load. For baselines, indicate '
                                         'the name of the baselines instead (opga, pso, aco, gurobi, compass)')
     parser.add_argument('--timeout', type=int, default=0, help="Number of seconds to retrieve gurobi solution")
 
@@ -28,7 +28,7 @@ def arguments(args=None):
     parser.add_argument('--data_distribution', type=str, default='const',
                         help='Data distribution to use during training, defaults and options depend on problem')
     parser.add_argument('--num_agents', type=int, default=2, help="Number of agents")
-    parser.add_argument('--num_depots', type=int, default=1, help="Number of depots. Options are 1 or 2. num_depots=1"
+    parser.add_argument('--num_depots', type=int, default=1, help="Number of depots. Options are 1 or 2. num_depots=1 "
                         "means that the start and end depot are the same. num_depots=2 means that they are different")
     parser.add_argument('--return2depot', type=str2bool, default=True, help="True for constraint of returning to depot")
     parser.add_argument('--max_length', type=float, default=2, help="Normalized time limit to solve the problem")
@@ -44,23 +44,11 @@ def arguments(args=None):
 
     # Check baseline is correct for the given problem
     assert opts.model in ('opga', 'aco', 'pso', 'gurobi', 'compass') or os.path.exists(opts.model), \
-        'Path to model does not exist. For baselines, the supported baselines for TOP are opga, aco, pso, gurobi', 'compass'
+        'Path to model does not exist. For baselines, the supported baselines for TOP are opga, aco, pso, gurobi, compass'
     return opts
 
 
-# def force_return(tour, loc, max_length):
-#     new_tour, distance = [tour[0]], 0
-#     for i in range(len(tour) - 1):
-#         distance += np.linalg.norm(loc[tour[i]] - loc[tour[i + 1]])
-#         if distance + np.linalg.norm(loc[tour[-1]] - loc[tour[i + 1]]) > max_length:
-#             new_tour.append(tour[-1])
-#             break
-#         new_tour.append(tour[i + 1])
-#     return np.array(new_tour)
-
-
 def baselines(num_agents, baseline, dataset, return2depot=True, timeout=0):
-
     # https://github.com/robin-shaun/Multi-UAV-Task-Assignment-Benchmark
     # https://github.com/dietmarwo/Multi-UAV-Task-Assignment-Benchmark
 
