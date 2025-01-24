@@ -106,15 +106,35 @@ def plot_tour_streamlit(tours, inputs, problem, model_name, data_dist=''):
     fig = go.Figure()
 
     # Plot depot
-    fig.add_trace(go.Scatter(x=[depot[0]], y=[depot[1]], mode='markers', marker=dict(color='red', size=10),
-                             name='Depot'))
+    fig.add_trace(
+        go.Scatter(x=[depot[0]], y=[depot[1]], mode='markers', name='Depot', marker=dict(
+            color='deepskyblue',
+            size=25,
+            symbol='triangle-up',
+            line=dict(color='black', width=1)
+        ))
+    )
     if 'depot2' in inputs:
-        fig.add_trace(go.Scatter(x=[depot2[0]], y=[depot2[1]], mode='markers', marker=dict(color='blue', size=10),
-                                 name='Depot 2'))
+        fig.add_trace(
+            go.Scatter(x=[depot2[0]], y=[depot2[1]], mode='markers', name='Depot 2', marker=dict(
+                color='limegreen',
+                size=25,
+                symbol='triangle-up',
+                line=dict(color='black', width=1)
+            ))
+        )
 
     # Plot nodes
-    fig.add_trace(go.Scatter(x=loc[:, 0], y=loc[:, 1], mode='markers', marker=dict(color='cyan', size=10),
-                             name='Nodes'))
+    marker_opacity = 0.5 * (1 + prizes)
+    marker_size = 5 * (2 + 3*prizes)
+    fig.add_trace(
+        go.Scatter(x=loc[:, 0], y=loc[:, 1], mode='markers', name='Nodes', marker=dict(
+            color='red',
+            size=marker_size,
+            opacity=marker_opacity,
+            line=dict(color='black', width=1)
+        ))
+    )
     loc = np.concatenate(([depot], loc, [depot2]), axis=0)
 
     # Prizes (add prize 0 to depots)
@@ -142,8 +162,52 @@ def plot_tour_streamlit(tours, inputs, problem, model_name, data_dist=''):
     # Set title
     title = f"Number of Nodes: {num_nodes} / {len(loc) - 2}        \
               Path length: {length:.2f} / {num_agents * max_length:.0f}        \
-              Reward collected: {reward:.2f} / {prizes.sum():.0f}"
-    fig.update_layout(title=title, xaxis_title="X-axis", yaxis_title="Y-axis", showlegend=True)
+              Reward collected: {reward:.2f} / {prizes.sum():.2f}"
+    fig.update_layout(
+        title=title,
+        showlegend=True,
+        autosize=False,
+        width=700,
+        height=700,
+        xaxis=dict(
+            showgrid=False,
+            showticklabels=False,
+            range=[0, 1],
+        ),
+        yaxis=dict(
+            showgrid=False,
+            showticklabels=False,
+            range=[0, 1],
+        ),
+    )
+    fig.update_xaxes(constrain='domain')  
+    fig.update_yaxes(scaleanchor= 'x')
+    
+    # Add four lines to form the square borders
+    fig.add_trace(go.Scatter(
+        x=[0, 0], y=[0, 1],  # Left border
+        mode='lines',
+        line=dict(color='black', width=2),
+        showlegend=False
+    ))
+    fig.add_trace(go.Scatter(
+        x=[0, 1], y=[0, 0],  # Bottom border
+        mode='lines',
+        line=dict(color='black', width=2),
+        showlegend=False
+    ))
+    fig.add_trace(go.Scatter(
+        x=[1, 1], y=[0, 1],  # Right border
+        mode='lines',
+        line=dict(color='black', width=2),
+        showlegend=False
+    ))
+    fig.add_trace(go.Scatter(
+        x=[0, 1], y=[1, 1],  # Top border
+        mode='lines',
+        line=dict(color='black', width=2),
+        showlegend=False
+    ))
 
     # Render the plot in Streamlit
     st.plotly_chart(fig)
@@ -151,6 +215,11 @@ def plot_tour_streamlit(tours, inputs, problem, model_name, data_dist=''):
 
 
 def main():
+    # Set name and icon to webpage
+    st.set_page_config(
+        page_title="TOP Demo",
+        page_icon="🧭",
+    )
     st.title("Team Orienteering Problem")
 
     # Initialize session state for tours
@@ -158,7 +227,7 @@ def main():
     model_name = "Scenario"
 
     # Sidebar for input parameters
-    st.sidebar.header("Input Parameters")
+    st.sidebar.header("Inputs")
     seed = st.sidebar.number_input("Random Seed", value=0)
     model = st.sidebar.selectbox("Model", ["Transformer", "Pointer Network", "Graph Pointer Network", "GAMMA", "Genetic Algorithm", "Compass", "ACO", "PSO", "Gurobi"], index=0)
     timeout = 0  # st.sidebar.number_input("Timeout (seconds)", value=0)
