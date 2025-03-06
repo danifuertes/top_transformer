@@ -1,7 +1,9 @@
-import random
-import numpy as np
-import math
 import time
+import math
+import random
+import warnings
+import numpy as np
+warnings.simplefilter("ignore", category=RuntimeWarning)
 
 
 class ACO:

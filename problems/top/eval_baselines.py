@@ -113,7 +113,7 @@ def solve_pso(directory, name, depot, loc, prize, max_length, num_agents, return
         #         force_return(np.concatenate(([0], tour, [0])), np.concatenate(([depot], loc), 0), max_length)[1:-1]
         #         for tour in tours
         #     ]
-        print(tours)
+        # print(tours)
         cost = np.sum([-calc_op_total(prize, tour) for tour in tours])
         save_dataset((cost, tours, duration), problem_filename)
 
